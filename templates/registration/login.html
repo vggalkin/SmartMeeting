@@ -1,0 +1,121 @@
+<!-- templates/registration/login.html -->
+{% extends 'base.html' %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fas fa-sign-in-alt"></i> Вход в SmartMeeting</h3>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Неправильное имя пользователя или пароль. Пожалуйста, попробуйте снова.
+                        </div>
+                    {% endif %}
+                    
+                    {% if next %}
+                        {% if user.is_authenticated %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle"></i> 
+                                У вас нет доступа к этой странице. Войдите под другой учетной записью.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                Пожалуйста, войдите, чтобы продолжить.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user"></i> Имя пользователя
+                            </label>
+                            <input type="text" name="username" id="username" class="form-control" 
+                                   required autofocus placeholder="Введите имя пользователя">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Пароль
+                            </label>
+                            <input type="password" name="password" id="password" class="form-control" 
+                                   required placeholder="Введите пароль">
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="remember" id="remember" class="form-check-input">
+                            <label for="remember" class="form-check-label">
+                                Запомнить меня
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </button>
+                        
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <p class="mb-0">
+                            <a href="/admin/" class="text-decoration-none">
+                                <i class="fas fa-user-shield"></i> Вход для администратора
+                            </a>
+                        </p>
+                        <p class="mt-2 mb-0 text-muted">
+                            <small>Нет учетной записи? Обратитесь к администратору</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Информационный блок -->
+            <div class="card mt-3">
+                <div class="card-body text-center text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    <small>Демо-доступ: войдите как администратор или создайте нового пользователя</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 10px;
+        font-weight: bold;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s;
+    }
+    input:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+    }
+</style>
+{% endblock %}
+

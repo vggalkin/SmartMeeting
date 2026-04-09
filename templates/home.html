@@ -1,0 +1,152 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}Главная - SmartMeeting{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero секция -->
+    <div class="jumbotron bg-light p-5 rounded-lg mb-4 text-center">
+        <h1 class="display-4">🏢 SmartMeeting</h1>
+        <p class="lead">Умная система бронирования переговорных комнат</p>
+        <hr class="my-4">
+        <p>Бронируйте переговорные комнаты легко и быстро. Никаких конфликтов и путаницы!</p>
+        {% if not user.is_authenticated %}
+            <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Войти в систему</a>
+            <a class="btn btn-secondary btn-lg" href="/admin/" role="button">Демо-доступ</a>
+        {% else %}
+            <a class="btn btn-primary btn-lg" href="{% url 'calendar' %}" role="button">📅 Перейти к календарю</a>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+        <!-- Статистика -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Доступно комнат</h5>
+                        <p class="card-text display-4">{{ rooms_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Мои бронирования</h5>
+                        <p class="card-text display-4">{{ my_bookings_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Активных сейчас</h5>
+                        <p class="card-text display-4" id="active-now">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ближайшие бронирования -->
+        <div class="card">
+            <div class="card-header">
+                <h4>📋 Мои ближайшие встречи</h4>
+            </div>
+            <div class="card-body">
+                {% if upcoming_bookings %}
+                    <div class="list-group">
+                        {% for booking in upcoming_bookings %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ booking.title }}</h5>
+                                    <small class="text-muted">{{ booking.start_time|date:"d.m.Y" }}</small>
+                                </div>
+                                <p class="mb-1">
+                                    🏠 {{ booking.room.name }} ({{ booking.room.floor }} этаж) <br>
+                                    🕐 {{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
+                                </p>
+                                <small class="text-muted">
+                                    Статус:
+                                    {% if booking.status == 'confirmed' %}
+                                        <span class="badge bg-success">Подтверждено</span>
+                                    {% elif booking.status == 'pending' %}
+                                        <span class="badge bg-warning">Ожидает</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ booking.get_status_display }}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">У вас пока нет запланированных встреч</p>
+                    <div class="text-center">
+                        <a href="{% url 'calendar' %}" class="btn btn-primary">Создать бронирование</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <!-- Преимущества для неавторизованных -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3>📅</h3>
+                        <h5 class="card-title">Удобный календарь</h5>
+                        <p class="card-text">Визуальный календарь с drag-n-drop интерфейсом</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3>🔔</h3>
+                        <h5 class="card-title">Умные напоминания</h5>
+                        <p class="card-text">Автоматические уведомления о предстоящих встречах</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3>🚀</h3>
+                        <h5 class="card-title">Быстрое бронирование</h5>
+                        <p class="card-text">Бронируйте комнаты в несколько кликов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .jumbotron {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .jumbotron .btn-light {
+        background: white;
+        color: #764ba2;
+    }
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<script>
+    // Функция для подсчета активных бронирований
+    function updateActiveBookings() {
+        const now = new Date();
+        // Здесь можно сделать AJAX запрос к API
+        // Для простоты пока оставим заглушку
+        document.getElementById('active-now').textContent = '{{ upcoming_bookings|length }}';
+    }
+    updateActiveBookings();
+</script>
+{% endblock %}

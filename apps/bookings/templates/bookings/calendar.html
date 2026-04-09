@@ -1,0 +1,69 @@
+<!-- apps/bookings/templates/bookings/calendar.html -->
+{% extends 'base.html' %}
+
+{% block title %}Календарь бронирований{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>📋 Мои бронирования</h5>
+            </div>
+            <div class="card-body" id="my-bookings-list">
+                <div class="list-group">
+                    {% for booking in my_bookings %}
+                        <div class="list-group-item">
+                            <strong>{{ booking.title }}</strong><br>
+                            <small>{{ booking.room.name }}</small><br>
+                            <small>{{ booking.start_time|date:"d.m H:i" }} - {{ booking.end_time|date:"H:i" }}</small>
+                            <span class="badge bg-{% if booking.status == 'confirmed' %}success{% else %}warning{% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Нет активных бронирований</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'create_booking' %}" class="btn btn-primary w-100 mt-3">+ Создать бронирование</a>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        locale: 'ru',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        slotMinTime: '08:00:00',
+        slotMaxTime: '22:00:00',
+        events: '/api/events/',
+        selectable: true,
+        select: function(info) {
+            if (confirm('Забронировать на ' + info.startStr + '?')) {
+                window.location.href = '/bookings/create/?start=' + info.startStr;
+            }
+        },
+        eventClick: function(info) {
+            alert('Бронирование: ' + info.event.title);
+        }
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}
