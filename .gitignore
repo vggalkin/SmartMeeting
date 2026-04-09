@@ -3,3 +3,6 @@
 db.sqlite3
 .idea/
 logs/
+**/__pycache__/
+*.pyc
+
