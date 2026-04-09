@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "63790:6379"  # Нестандартный порт
+    restart: always
+    networks:
+      - smartmeeting_network
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: smartmeeting
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54320:5432"  # Нестандартный порт
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - smartmeeting_network
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
+      REDIS_URL: redis://redis:6379
+    restart: always
+    networks:
+      - smartmeeting_network
+
+  celery:
+    build: .
+    command: celery -A smartmeeting worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
+      REDIS_URL: redis://redis:6379
+    restart: always
+    networks:
+      - smartmeeting_network
+
+  celery-beat:
+    build: .
+    command: celery -A smartmeeting beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - celery
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
+      REDIS_URL: redis://redis:6379
+    restart: always
+    networks:
+      - smartmeeting_network
+
+volumes:
+  postgres_data:
+
+networks:
+  smartmeeting_network:
+    driver: bridge

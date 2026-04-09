@@ -10,6 +10,8 @@ from .models import Booking
 from .forms import BookingForm
 from .services import BookingService
 from apps.rooms.models import Room
+from apps.notifications.tasks import send_booking_reminder
+from datetime import timedelta
 
 
 def home_view(request):
@@ -100,6 +102,13 @@ def create_booking(request):
                 booking.save()
                 messages.success(request,
                                  f'✅ Переговорная "{booking.room.name}" успешно забронирована на {start_datetime.strftime("%d.%m.%Y %H:%M")}!')
+                reminder_time = start_datetime - timedelta(hours=1)
+                if reminder_time > timezone.now():
+                    send_booking_reminder.apply_async(
+                        args=[booking.id],
+                        eta=reminder_time
+                    )
+                    messages.info(request, '🔔 Напоминание будет отправлено за час до встречи')
                 return redirect('calendar')
             except Exception as e:
                 messages.error(request, f'❌ Ошибка при создании бронирования: {str(e)}')
