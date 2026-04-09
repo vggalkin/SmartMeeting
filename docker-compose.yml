@@ -4,8 +4,9 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "63790:6379"  # Нестандартный порт
+      - "6379:6379"
     restart: always
+    command: redis-server --bind 0.0.0.0 --protected-mode no
     networks:
       - smartmeeting_network
 
@@ -16,7 +17,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "54320:5432"  # Нестандартный порт
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
@@ -36,7 +37,6 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
       REDIS_URL: redis://redis:6379
-    restart: always
     networks:
       - smartmeeting_network
 
@@ -50,8 +50,7 @@ services:
       - redis
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
-      REDIS_URL: redis://redis:6379
-    restart: always
+      REDIS_URL: redis://redis:6379  # Используем имя сервиса, не localhost
     networks:
       - smartmeeting_network
 
@@ -66,8 +65,7 @@ services:
       - celery
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/smartmeeting
-      REDIS_URL: redis://redis:6379
-    restart: always
+      REDIS_URL: redis://redis:6379  # Используем имя сервиса, не localhost
     networks:
       - smartmeeting_network
 
