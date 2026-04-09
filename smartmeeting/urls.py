@@ -4,6 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from apps.bookings.views import home_view, calendar_view, get_events_api
+from apps.accounts.views import register
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +16,7 @@ urlpatterns = [
     # Календарь и API
     path('calendar/', include('apps.bookings.urls')),
     path('api/events/', get_events_api, name='api_events'),
+    path('register/', register, name='register'),
 ]
 
 if settings.DEBUG:

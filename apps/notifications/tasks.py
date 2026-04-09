@@ -4,10 +4,11 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.auth import get_user_model
 import logging
 
 logger = logging.getLogger(__name__)
-
+User = get_user_model()
 
 @shared_task
 def send_booking_reminder(booking_id):
